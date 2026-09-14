@@ -1,0 +1,17 @@
+.status-dashboard:empty {
+  display: none;
+}
+
+.status-dashboard[data-status="erro"] {
+  color: #fb7185;
+}
+
+.status-dashboard[data-status="sucesso"] {
+  color: #34d399;
+}
+
+button:disabled,
+select:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
