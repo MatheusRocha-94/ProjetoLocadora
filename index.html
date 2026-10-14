@@ -38,31 +38,13 @@
         </div>
       </div>
 
-      <!-- Filtros: Seletor de Cidades e Botão Atualizar -->
+      <!-- Ações principais -->
       <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full lg:w-auto">
-        
-        <!-- Select de Cidades -->
-        <div class="relative w-full sm:w-64">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-kovi-pink">
-            <i data-lucide="map-pin" class="w-4 h-4"></i>
-          </div>
-          <label for="selectCidade" class="sr-only">Cidade</label>
-          <select id="selectCidade" class="w-full bg-kovi-dark border border-kovi-border text-white text-sm rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-kovi-pink appearance-none cursor-pointer">
-            <option value="sao-paulo">São Paulo (SP)</option>
-            <option value="porto-alegre">Porto Alegre (RS)</option>
-            <option value="santos">Santos (SP)</option>
-            <option value="belo-horizonte">Belo Horizonte (MG)</option>
-            <option value="recife">Recife(PE)</option>
-            <option value="curitiba">Curitiba (PR)</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-          </div>
-        </div>
-
-        <!-- Botão Atualizar -->
-        <button id="botaoAtualizar" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-kovi-pink hover:opacity-90 active:scale-95 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-kovi-pink/20">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar
+        <button id="abrirCadastroCarro" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-500 hover:opacity-90 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          <i data-lucide="car-front" class="w-4 h-4"></i> Cadastrar carros
+        </button>
+        <button id="abrirMovimentacao" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-sky-500 hover:opacity-90 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          <i data-lucide="arrow-right-left" class="w-4 h-4"></i> Movimentar carros
         </button>
       </div>
 
@@ -124,61 +106,18 @@
 
     </div>
 
-    <!-- Cadastro de movimentação -->
-    <section class="bg-kovi-card p-6 rounded-2xl border border-kovi-border shadow-xl" aria-labelledby="tituloMovimentacao">
-      <div class="mb-5">
-        <h2 id="tituloMovimentacao" class="text-lg font-bold text-white">Cadastrar movimentação</h2>
-        <p class="text-xs text-slate-400">Registre a entrada ou saída de veículos em uma região.</p>
-      </div>
-
-      <form id="formMovimentacao" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div>
-          <label for="movCidade" class="block mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Região</label>
-          <select id="movCidade" name="cidade" required class="w-full bg-kovi-dark border border-kovi-border text-white text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-kovi-pink">
-            <option value="sao-paulo">São Paulo (SP)</option>
-            <option value="porto-alegre">Porto Alegre (RS)</option>
-            <option value="santos">Santos (SP)</option>
-            <option value="belo-horizonte">Belo Horizonte (MG)</option>
-            <option value="recife">Recife (PE)</option>
-            <option value="curitiba">Curitiba (PR)</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="movModelo" class="block mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Modelo</label>
-          <select id="movModelo" name="modeloId" required class="w-full bg-kovi-dark border border-kovi-border text-white text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-kovi-pink">
-            <option value="">Carregando…</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="movTipo" class="block mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Movimento</label>
-          <select id="movTipo" name="tipo" required class="w-full bg-kovi-dark border border-kovi-border text-white text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-kovi-pink">
-            <option value="devolucao">Entrada (devolução)</option>
-            <option value="retirada">Saída (retirada)</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="movQuantidade" class="block mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Quantidade</label>
-          <input id="movQuantidade" name="quantidade" type="number" min="1" step="1" value="1" required class="w-full bg-kovi-dark border border-kovi-border text-white text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-kovi-pink">
-        </div>
-
-        <div class="flex items-end">
-          <button id="botaoCadastrar" type="submit" class="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:opacity-90 active:scale-95 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition">
-            <i data-lucide="plus" class="w-4 h-4"></i> Registrar
-          </button>
-        </div>
-      </form>
-      <p id="statusMovimentacao" class="status-dashboard mt-4 text-sm text-slate-400" role="status" aria-live="polite"></p>
-    </section>
-
     <!-- Container do Gráfico Customizado -->
     <div class="bg-kovi-card p-6 rounded-2xl border border-kovi-border shadow-xl">
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex flex-col xl:flex-row justify-between xl:items-end gap-5 mb-6">
         <div>
           <h2 class="text-lg font-bold text-white">Movimentação Diária da Cidade</h2>
           <p class="text-xs text-slate-400">Volume de entradas e saídas por dia na região selecionada</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 w-full xl:w-auto">
+          <div><label for="selectCidade" class="filtro-label">Região</label><select id="selectCidade" class="filtro-campo"><option value="sao-paulo">São Paulo (SP)</option><option value="porto-alegre">Porto Alegre (RS)</option><option value="santos">Santos (SP)</option><option value="belo-horizonte">Belo Horizonte (MG)</option><option value="recife">Recife (PE)</option><option value="curitiba">Curitiba (PR)</option></select></div>
+          <div><label for="movDataInicio" class="filtro-label">Data inicial</label><input id="movDataInicio" type="date" class="filtro-campo"></div>
+          <div><label for="movDataFim" class="filtro-label">Data final</label><input id="movDataFim" type="date" class="filtro-campo"></div>
+          <button id="botaoAtualizar" type="button" class="self-end flex items-center justify-center gap-2 bg-kovi-pink hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm"><i data-lucide="filter" class="w-4 h-4"></i> Filtrar</button>
         </div>
       </div>
       <div class="h-72 w-full">
@@ -187,7 +126,57 @@
       <p id="statusDashboard" class="status-dashboard mt-4 text-sm text-slate-400" role="status" aria-live="polite"></p>
     </div>
 
+    <div class="bg-kovi-card p-6 rounded-2xl border border-kovi-border shadow-xl">
+      <div class="flex flex-col xl:flex-row justify-between xl:items-end gap-5 mb-6">
+        <div><h2 class="text-lg font-bold text-white">Cadastro de Carros por Data</h2><p class="text-xs text-slate-400">Quantidade de carros adicionados ao estoque em cada dia</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 w-full xl:w-auto">
+          <div><label for="cadGraficoCidade" class="filtro-label">Região</label><select id="cadGraficoCidade" class="filtro-campo"><option value="sao-paulo">São Paulo (SP)</option><option value="porto-alegre">Porto Alegre (RS)</option><option value="santos">Santos (SP)</option><option value="belo-horizonte">Belo Horizonte (MG)</option><option value="recife">Recife (PE)</option><option value="curitiba">Curitiba (PR)</option></select></div>
+          <div><label for="cadDataInicio" class="filtro-label">Data inicial</label><input id="cadDataInicio" type="date" class="filtro-campo"></div>
+          <div><label for="cadDataFim" class="filtro-label">Data final</label><input id="cadDataFim" type="date" class="filtro-campo"></div>
+          <button id="botaoFiltrarCadastros" type="button" class="self-end flex items-center justify-center gap-2 bg-emerald-500 hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm"><i data-lucide="filter" class="w-4 h-4"></i> Filtrar</button>
+        </div>
+      </div>
+      <div class="h-72 w-full"><canvas id="graficoCadastros"></canvas></div>
+      <p id="statusCadastros" class="status-dashboard mt-4 text-sm text-slate-400" role="status" aria-live="polite"></p>
+    </div>
+
   </div>
+
+  <dialog id="modalCadastroCarro" class="modal-app bg-kovi-card text-white rounded-2xl border border-kovi-border shadow-2xl p-0 w-[min(92vw,700px)]">
+    <div class="p-6">
+      <div class="flex justify-between items-start gap-4 mb-6">
+        <div><h2 class="text-xl font-bold">Cadastrar carros</h2><p class="text-sm text-slate-400">Adicione veículos ao estoque da região.</p></div>
+        <button type="button" data-fechar-modal aria-label="Fechar" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+      </div>
+      <form id="formCadastroCarro" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label for="cadCidade" class="modal-label">Região</label><select id="cadCidade" name="cidade" required class="modal-campo"><option value="sao-paulo">São Paulo (SP)</option><option value="porto-alegre">Porto Alegre (RS)</option><option value="santos">Santos (SP)</option><option value="belo-horizonte">Belo Horizonte (MG)</option><option value="recife">Recife (PE)</option><option value="curitiba">Curitiba (PR)</option></select></div>
+        <div><label for="cadModelo" class="modal-label">Modelo</label><select id="cadModelo" name="modeloId" required class="modal-campo"><option value="">Carregando…</option></select></div>
+        <div><label for="cadCondicao" class="modal-label">Condição</label><select id="cadCondicao" name="condicao" required class="modal-campo"><option value="zero_km">Zero km</option><option value="seminovo">Seminovo</option></select></div>
+        <div><label for="cadFaixaKm" class="modal-label">Quilometragem</label><select id="cadFaixaKm" name="faixaKm" required class="modal-campo"><option value="ate_30">Até 30 km</option><option value="ate_50000">Até 50 mil km</option><option value="acima_100000">Acima de 100 mil km</option></select></div>
+        <div><label for="cadCategoria" class="modal-label">Categoria</label><select id="cadCategoria" name="categoria" required class="modal-campo"><option value="hatch">Hatch</option><option value="sedan">Sedan</option><option value="suv">SUV</option></select></div>
+        <div><label for="cadQuantidade" class="modal-label">Quantidade</label><input id="cadQuantidade" name="quantidade" type="number" min="1" step="1" value="1" required class="modal-campo"></div>
+        <p id="statusCadastroCarro" class="status-dashboard sm:col-span-2 text-sm" role="status" aria-live="polite"></p>
+        <div class="sm:col-span-2 flex justify-end gap-3"><button type="button" data-fechar-modal class="px-4 py-2.5 text-slate-300">Cancelar</button><button id="botaoCadastrarCarro" type="submit" class="bg-emerald-500 px-5 py-2.5 rounded-xl font-semibold">Cadastrar</button></div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="modalMovimentacao" class="modal-app bg-kovi-card text-white rounded-2xl border border-kovi-border shadow-2xl p-0 w-[min(92vw,700px)]">
+    <div class="p-6">
+      <div class="flex justify-between items-start gap-4 mb-6">
+        <div><h2 class="text-xl font-bold">Movimentar carros</h2><p class="text-sm text-slate-400">Registre uma entrada ou saída no estoque.</p></div>
+        <button type="button" data-fechar-modal aria-label="Fechar" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+      </div>
+      <form id="formMovimentacao" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label for="movCidade" class="modal-label">Região</label><select id="movCidade" name="cidade" required class="modal-campo"><option value="sao-paulo">São Paulo (SP)</option><option value="porto-alegre">Porto Alegre (RS)</option><option value="santos">Santos (SP)</option><option value="belo-horizonte">Belo Horizonte (MG)</option><option value="recife">Recife (PE)</option><option value="curitiba">Curitiba (PR)</option></select></div>
+        <div><label for="movCarro" class="modal-label">Carro cadastrado</label><select id="movCarro" name="carroId" required class="modal-campo"><option value="">Selecione uma região</option></select></div>
+        <div><label for="movTipo" class="modal-label">Movimentação</label><select id="movTipo" name="tipo" required class="modal-campo"><option value="devolucao">Entrada (devolução)</option><option value="retirada">Saída (retirada)</option></select></div>
+        <div><label for="movQuantidade" class="modal-label">Quantidade</label><input id="movQuantidade" name="quantidade" type="number" min="1" step="1" value="1" required class="modal-campo"></div>
+        <p id="statusMovimentacao" class="status-dashboard sm:col-span-2 text-sm" role="status" aria-live="polite"></p>
+        <div class="sm:col-span-2 flex justify-end gap-3"><button type="button" data-fechar-modal class="px-4 py-2.5 text-slate-300">Cancelar</button><button id="botaoCadastrar" type="submit" class="bg-sky-500 px-5 py-2.5 rounded-xl font-semibold">Movimentar</button></div>
+      </form>
+    </div>
+  </dialog>
 
 </body>
 </html>

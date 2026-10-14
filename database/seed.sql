@@ -50,3 +50,14 @@ FROM (
 JOIN cidades c ON c.slug = dados.cidade
 JOIN modelos m ON m.nome = dados.modelo
 ON DUPLICATE KEY UPDATE quantidade = VALUES(quantidade);
+
+INSERT INTO carros (cidade_id, modelo_id, condicao, faixa_km, categoria, quantidade_inicial)
+SELECT cidade_id, modelo_id, 'seminovo', 'ate_50000', 'hatch', quantidade
+FROM estoque_inicial
+ON DUPLICATE KEY UPDATE quantidade_inicial = VALUES(quantidade_inicial);
+
+INSERT INTO cadastros_carros (carro_id, quantidade, cadastrado_em)
+SELECT ca.id, ca.quantidade_inicial, ca.criado_em
+FROM carros ca
+WHERE ca.quantidade_inicial > 0
+  AND NOT EXISTS (SELECT 1 FROM cadastros_carros cc WHERE cc.carro_id = ca.id);

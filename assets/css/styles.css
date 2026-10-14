@@ -15,3 +15,68 @@ select:disabled {
   cursor: wait;
   opacity: 0.65;
 }
+
+.modal-app::backdrop {
+  background: rgba(8, 11, 18, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.modal-app[open] {
+  animation: modal-entrada 160ms ease-out;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.modal-campo {
+  width: 100%;
+  border: 1px solid #2e3545;
+  border-radius: 0.75rem;
+  background: #181c24;
+  color: white;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.modal-campo:focus {
+  border-color: #ff2a6d;
+  outline: none;
+}
+
+.filtro-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.filtro-campo {
+  width: 100%;
+  min-width: 145px;
+  border: 1px solid #2e3545;
+  border-radius: 0.75rem;
+  background: #181c24;
+  color: white;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8rem;
+  color-scheme: dark;
+}
+
+.filtro-campo:focus {
+  border-color: #ff2a6d;
+  outline: none;
+}
+
+@keyframes modal-entrada {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

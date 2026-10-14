@@ -17,7 +17,7 @@ if (!is_array($dados)) {
 }
 
 $cidadeSlug = trim((string) ($dados['cidade'] ?? ''));
-$modeloId = filter_var($dados['modeloId'] ?? null, FILTER_VALIDATE_INT);
+$carroId = filter_var($dados['carroId'] ?? null, FILTER_VALIDATE_INT);
 $quantidade = filter_var($dados['quantidade'] ?? null, FILTER_VALIDATE_INT);
 $tipo = (string) ($dados['tipo'] ?? '');
 
@@ -25,8 +25,8 @@ if (!preg_match('/^[a-z0-9-]{2,60}$/', $cidadeSlug)) {
     responderJson(['erro' => 'Informe uma região válida.'], 422);
 }
 
-if ($modeloId === false || $modeloId < 1 || $quantidade === false || $quantidade < 1) {
-    responderJson(['erro' => 'Modelo e quantidade devem ser válidos.'], 422);
+if ($carroId === false || $carroId < 1 || $quantidade === false || $quantidade < 1) {
+    responderJson(['erro' => 'Carro e quantidade devem ser válidos.'], 422);
 }
 
 if (!in_array($tipo, ['retirada', 'devolucao'], true)) {
@@ -38,40 +38,38 @@ $pdo->beginTransaction();
 
 try {
     $consultaCadastro = $pdo->prepare(
-        'SELECT c.id AS cidade_id, m.id AS modelo_id
-         FROM cidades c
-         JOIN modelos m ON m.id = :modelo_id
-         WHERE c.slug = :slug'
+        'SELECT ca.id AS carro_id, ca.cidade_id, ca.modelo_id
+         FROM carros ca
+         JOIN cidades c ON c.id = ca.cidade_id
+         WHERE ca.id = :carro_id AND c.slug = :slug
+         FOR UPDATE'
     );
-    $consultaCadastro->execute(['modelo_id' => $modeloId, 'slug' => $cidadeSlug]);
+    $consultaCadastro->execute(['carro_id' => $carroId, 'slug' => $cidadeSlug]);
     $cadastro = $consultaCadastro->fetch();
 
     if (!$cadastro) {
         $pdo->rollBack();
-        responderJson(['erro' => 'Região ou modelo não encontrado.'], 404);
+        responderJson(['erro' => 'Carro não encontrado nessa região.'], 404);
     }
 
     $consultaEstoque = $pdo->prepare(
         "SELECT
-            e.quantidade
+            ca.quantidade_inicial
             + COALESCE(SUM(CASE WHEN mv.tipo = 'devolucao' THEN mv.quantidade ELSE 0 END), 0)
             - COALESCE(SUM(CASE WHEN mv.tipo = 'retirada' THEN mv.quantidade ELSE 0 END), 0) AS saldo
-         FROM estoque_inicial e
-         LEFT JOIN movimentacoes mv
-           ON mv.cidade_id = e.cidade_id AND mv.modelo_id = e.modelo_id
-         WHERE e.cidade_id = :cidade_id AND e.modelo_id = :modelo_id
-         GROUP BY e.quantidade
-         FOR UPDATE"
+         FROM carros ca
+         LEFT JOIN movimentacoes mv ON mv.carro_id = ca.id
+         WHERE ca.id = :carro_id
+         GROUP BY ca.id, ca.quantidade_inicial"
     );
     $consultaEstoque->execute([
-        'cidade_id' => $cadastro['cidade_id'],
-        'modelo_id' => $cadastro['modelo_id'],
+        'carro_id' => $cadastro['carro_id'],
     ]);
     $saldo = $consultaEstoque->fetchColumn();
 
     if ($saldo === false) {
         $pdo->rollBack();
-        responderJson(['erro' => 'Não existe estoque inicial para esse modelo e região.'], 422);
+        responderJson(['erro' => 'Não existe estoque para esse carro.'], 422);
     }
 
     if ($tipo === 'retirada' && $quantidade > (int) $saldo) {
@@ -80,12 +78,13 @@ try {
     }
 
     $inserir = $pdo->prepare(
-        'INSERT INTO movimentacoes (cidade_id, modelo_id, tipo, quantidade, ocorrido_em)
-         VALUES (:cidade_id, :modelo_id, :tipo, :quantidade, NOW())'
+        'INSERT INTO movimentacoes (cidade_id, modelo_id, carro_id, tipo, quantidade, ocorrido_em)
+         VALUES (:cidade_id, :modelo_id, :carro_id, :tipo, :quantidade, NOW())'
     );
     $inserir->execute([
         'cidade_id' => $cadastro['cidade_id'],
         'modelo_id' => $cadastro['modelo_id'],
+        'carro_id' => $cadastro['carro_id'],
         'tipo' => $tipo,
         'quantidade' => $quantidade,
     ]);

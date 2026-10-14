@@ -24,8 +24,20 @@ if (!$cidade) {
     responderJson(['erro' => 'Cidade não encontrada.'], 404);
 }
 
-$fim = new DateTimeImmutable('today');
-$inicio = $fim->modify('-6 days');
+$inicioTexto = (string) ($_GET['inicio'] ?? '');
+$fimTexto = (string) ($_GET['fim'] ?? '');
+try {
+    $fim = $fimTexto !== '' ? new DateTimeImmutable($fimTexto) : new DateTimeImmutable('today');
+    $inicio = $inicioTexto !== '' ? new DateTimeImmutable($inicioTexto) : $fim->modify('-6 days');
+} catch (Throwable) {
+    responderJson(['erro' => 'Informe datas válidas.'], 422);
+}
+
+if (($inicioTexto !== '' && $inicio->format('Y-m-d') !== $inicioTexto)
+    || ($fimTexto !== '' && $fim->format('Y-m-d') !== $fimTexto)
+    || $inicio > $fim || $inicio->diff($fim)->days > 366) {
+    responderJson(['erro' => 'O período deve ter no máximo 366 dias.'], 422);
+}
 
 $consultaResumo = $pdo->prepare(
     "SELECT
@@ -38,7 +50,7 @@ $consultaResumo->execute(['cidade_id' => $cidade['id']]);
 $resumo = $consultaResumo->fetch();
 
 $consultaInicial = $pdo->prepare(
-    'SELECT COALESCE(SUM(quantidade), 0) FROM estoque_inicial WHERE cidade_id = :cidade_id'
+    'SELECT COALESCE(SUM(quantidade_inicial), 0) FROM carros WHERE cidade_id = :cidade_id'
 );
 $consultaInicial->execute(['cidade_id' => $cidade['id']]);
 $estoqueInicial = (int) $consultaInicial->fetchColumn();
