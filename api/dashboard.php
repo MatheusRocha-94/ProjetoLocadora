@@ -24,20 +24,8 @@ if (!$cidade) {
     responderJson(['erro' => 'Cidade não encontrada.'], 404);
 }
 
-$inicioTexto = (string) ($_GET['inicio'] ?? '');
-$fimTexto = (string) ($_GET['fim'] ?? '');
-try {
-    $fim = $fimTexto !== '' ? new DateTimeImmutable($fimTexto) : new DateTimeImmutable('today');
-    $inicio = $inicioTexto !== '' ? new DateTimeImmutable($inicioTexto) : $fim->modify('-6 days');
-} catch (Throwable) {
-    responderJson(['erro' => 'Informe datas válidas.'], 422);
-}
-
-if (($inicioTexto !== '' && $inicio->format('Y-m-d') !== $inicioTexto)
-    || ($fimTexto !== '' && $fim->format('Y-m-d') !== $fimTexto)
-    || $inicio > $fim || $inicio->diff($fim)->days > 366) {
-    responderJson(['erro' => 'O período deve ter no máximo 366 dias.'], 422);
-}
+$fim = new DateTimeImmutable('today');
+$inicio = $fim->modify('-6 days');
 
 $consultaResumo = $pdo->prepare(
     "SELECT
@@ -50,10 +38,23 @@ $consultaResumo->execute(['cidade_id' => $cidade['id']]);
 $resumo = $consultaResumo->fetch();
 
 $consultaInicial = $pdo->prepare(
-    'SELECT COALESCE(SUM(quantidade_inicial), 0) FROM carros WHERE cidade_id = :cidade_id'
+    'SELECT COALESCE(SUM(quantidade), 0) FROM estoque_inicial WHERE cidade_id = :cidade_id'
 );
 $consultaInicial->execute(['cidade_id' => $cidade['id']]);
 $estoqueInicial = (int) $consultaInicial->fetchColumn();
+
+$consultaStatus = $pdo->prepare(
+    "SELECT status,
+        SUM(CASE WHEN operacao = 'entrada' THEN quantidade ELSE -quantidade END) AS quantidade
+     FROM movimentacoes_status
+     WHERE cidade_id = :cidade_id
+     GROUP BY status"
+);
+$consultaStatus->execute(['cidade_id' => $cidade['id']]);
+$saldosStatus = ['manutencao' => 0, 'retido' => 0, 'sinistro' => 0];
+foreach ($consultaStatus->fetchAll() as $linha) {
+    $saldosStatus[$linha['status']] = (int) $linha['quantidade'];
+}
 
 $consultaGrafico = $pdo->prepare(
     "SELECT DATE(ocorrido_em) AS data,
@@ -95,6 +96,8 @@ while ($data <= $fim) {
 
 $totalSaidas = (int) $resumo['saidas'];
 $totalEntradas = (int) $resumo['entradas'];
+$saldoPatio = $estoqueInicial + $totalEntradas - $totalSaidas;
+$totalIndisponiveis = array_sum($saldosStatus);
 
 responderJson([
     'cidade' => [
@@ -104,7 +107,11 @@ responderJson([
     ],
     'totalSaidas' => $totalSaidas,
     'totalEntradas' => $totalEntradas,
-    'saldoPatio' => $estoqueInicial + $totalEntradas - $totalSaidas,
+    'saldoPatio' => $saldoPatio,
+    'disponiveis' => $saldoPatio - $totalIndisponiveis,
+    'manutencao' => $saldosStatus['manutencao'],
+    'retidos' => $saldosStatus['retido'],
+    'sinistro' => $saldosStatus['sinistro'],
     'grafico' => [
         'labels' => $labels,
         'saidas' => $saidas,
