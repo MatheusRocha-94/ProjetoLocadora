@@ -16,6 +16,7 @@ Dashboard em HTML/JavaScript com API PHP e banco MySQL/MariaDB. O estoque inicia
 - `assets/js/tailwind-config.js`: tema visual.
 - `assets/js/app.js`: gráfico e integração com a API.
 - `api/dashboard.php`: consolidação dos KPIs e do gráfico diário.
+- `api/historico.php`: consulta unificada e filtrada do histórico da frota.
 - `api/movimentacoes.php`: cadastro de entradas e saídas.
 - `api/status-veiculos.php`: cadastro de entradas e liberações de veículos indisponíveis.
 - `api/modelos.php`: modelos disponíveis para o cadastro.
@@ -108,6 +109,24 @@ O cálculo utilizado nesta entrega é:
 ```text
 disponíveis = saldo no pátio - manutenção - retidos - sinistro
 ```
+
+### Entrega 5 — Histórico, filtros e exportação de operações
+
+Implementações:
+
+- criação de um modal responsivo de histórico dentro do dashboard;
+- consulta unificada de retiradas, devoluções, manutenções, retenções e sinistros;
+- novo endpoint `api/historico.php`;
+- filtros por cidade, modelo, tipo de operação e período;
+- validação das datas e dos parâmetros recebidos pela API;
+- exibição dos registros em tabela com identificação visual por operação;
+- apresentação da quantidade de registros e do total de veículos movimentados;
+- exibição dos 1.000 registros mais recentes para proteger o desempenho da consulta;
+- estado de carregamento, mensagem de lista vazia e tratamento de erros;
+- fechamento do modal pelo botão, pela tecla `Esc` ou pelo fundo da janela;
+- proteção do conteúdo das observações antes da exibição no HTML;
+- exportação em CSV respeitando todos os filtros ativos;
+- geração do CSV em formato compatível com Excel, incluindo acentos e separador por ponto e vírgula.
 
 ## Atualização de uma instalação existente
 

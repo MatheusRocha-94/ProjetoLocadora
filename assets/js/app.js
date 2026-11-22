@@ -19,8 +19,21 @@ const elementos = {
   statusModelo: document.getElementById('statusModelo'),
   statusQuantidade: document.getElementById('statusQuantidade'),
   botaoStatus: document.getElementById('botaoStatus'),
-  statusSituacaoMensagem: document.getElementById('statusSituacaoMensagem')
+  statusSituacaoMensagem: document.getElementById('statusSituacaoMensagem'),
+  botaoAbrirHistorico: document.getElementById('botaoAbrirHistorico'),
+  botaoFecharHistorico: document.getElementById('botaoFecharHistorico'),
+  modalHistorico: document.getElementById('modalHistorico'),
+  formFiltrosHistorico: document.getElementById('formFiltrosHistorico'),
+  historicoModelo: document.getElementById('historicoModelo'),
+  corpoHistorico: document.getElementById('corpoHistorico'),
+  statusHistorico: document.getElementById('statusHistorico'),
+  historicoTotalRegistros: document.getElementById('historicoTotalRegistros'),
+  historicoTotalVeiculos: document.getElementById('historicoTotalVeiculos'),
+  botaoLimparHistorico: document.getElementById('botaoLimparHistorico'),
+  botaoExportarHistorico: document.getElementById('botaoExportarHistorico')
 };
+
+let registrosHistorico = [];
 
 lucide.createIcons();
 
@@ -136,6 +149,114 @@ async function carregarModelos() {
     .map((modelo) => `<option value="${modelo.id}">${modelo.nome}</option>`)
     .join('');
   elementos.statusModelo.innerHTML = elementos.movModelo.innerHTML;
+  elementos.historicoModelo.innerHTML = '<option value="">Todos os modelos</option>' + elementos.movModelo.innerHTML;
+}
+
+function escaparHtml(valor) {
+  const elemento = document.createElement('div');
+  elemento.textContent = valor ?? '';
+  return elemento.innerHTML;
+}
+
+function descricaoOperacao(registro) {
+  const tipos = {
+    retirada: 'Retirada', devolucao: 'Devolução', manutencao: 'Manutenção',
+    retido: 'Retido', sinistro: 'Sinistro'
+  };
+  const tipo = tipos[registro.tipo] || registro.tipo;
+  return registro.operacao === 'liberacao' ? `Liberação — ${tipo}` : tipo;
+}
+
+function classeOperacao(registro) {
+  if (registro.operacao === 'liberacao') return 'bg-sky-500/10 text-sky-400 border-sky-500/20';
+  return {
+    retirada: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    devolucao: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    manutencao: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    retido: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+    sinistro: 'bg-red-500/10 text-red-400 border-red-500/20'
+  }[registro.tipo] || 'bg-slate-500/10 text-slate-300 border-slate-500/20';
+}
+
+function renderizarHistorico(dados) {
+  registrosHistorico = dados.registros || [];
+  elementos.historicoTotalRegistros.textContent = dados.totalRegistros ?? 0;
+  elementos.historicoTotalVeiculos.textContent = dados.totalVeiculos ?? 0;
+  elementos.botaoExportarHistorico.disabled = registrosHistorico.length === 0;
+
+  if (!registrosHistorico.length) {
+    elementos.corpoHistorico.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+
+  elementos.corpoHistorico.innerHTML = registrosHistorico.map((registro) => {
+    const data = new Date(registro.data.replace(' ', 'T')).toLocaleString('pt-BR');
+    return `<tr class="hover:bg-white/[0.02]">
+      <td class="whitespace-nowrap p-3 text-slate-300">${escaparHtml(data)}</td>
+      <td class="whitespace-nowrap p-3 text-white">${escaparHtml(registro.cidade)} (${escaparHtml(registro.uf)})</td>
+      <td class="p-3 text-slate-300">${escaparHtml(registro.modelo)}</td>
+      <td class="p-3"><span class="inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${classeOperacao(registro)}">${escaparHtml(descricaoOperacao(registro))}</span></td>
+      <td class="p-3 text-right font-bold text-white">${registro.quantidade}</td>
+      <td class="max-w-xs p-3 text-slate-400">${escaparHtml(registro.observacao || '—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function carregarHistorico() {
+  elementos.statusHistorico.dataset.status = 'carregando';
+  elementos.statusHistorico.textContent = 'Carregando histórico…';
+  elementos.corpoHistorico.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Consultando dados…</td></tr>';
+  const parametros = new URLSearchParams();
+  new FormData(elementos.formFiltrosHistorico).forEach((valor, chave) => {
+    if (valor) parametros.set(chave, valor);
+  });
+
+  try {
+    const resposta = await fetch(`api/historico.php?${parametros}`, { headers: { Accept: 'application/json' } });
+    const dados = await resposta.json();
+    if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível carregar o histórico.');
+    renderizarHistorico(dados);
+    elementos.statusHistorico.dataset.status = 'sucesso';
+    elementos.statusHistorico.textContent = dados.totalRegistros >= dados.limite
+      ? `Exibindo os ${dados.limite} registros mais recentes.` : 'Consulta concluída.';
+  } catch (erro) {
+    registrosHistorico = [];
+    elementos.botaoExportarHistorico.disabled = true;
+    elementos.corpoHistorico.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-400">Falha ao carregar os dados.</td></tr>';
+    elementos.statusHistorico.dataset.status = 'erro';
+    elementos.statusHistorico.textContent = erro.message;
+  }
+}
+
+function abrirHistorico() {
+  elementos.modalHistorico.classList.remove('hidden');
+  elementos.modalHistorico.classList.add('flex');
+  document.body.classList.add('overflow-hidden');
+  carregarHistorico();
+  elementos.botaoFecharHistorico.focus();
+}
+
+function fecharHistorico() {
+  elementos.modalHistorico.classList.add('hidden');
+  elementos.modalHistorico.classList.remove('flex');
+  document.body.classList.remove('overflow-hidden');
+  elementos.botaoAbrirHistorico.focus();
+}
+
+function exportarHistorico() {
+  if (!registrosHistorico.length) return;
+  const campos = ['Data', 'Cidade', 'UF', 'Modelo', 'Operação', 'Quantidade', 'Observação'];
+  const formatar = (valor) => `"${String(valor ?? '').replaceAll('"', '""')}"`;
+  const linhas = registrosHistorico.map((registro) => [
+    registro.data, registro.cidade, registro.uf, registro.modelo,
+    descricaoOperacao(registro), registro.quantidade, registro.observacao || ''
+  ].map(formatar).join(';'));
+  const blob = new Blob(['\uFEFF' + [campos.join(';'), ...linhas].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `historico-frota-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 async function cadastrarStatus(evento) {
@@ -230,6 +351,15 @@ elementos.cidade.addEventListener('change', carregarDadosDoBackend);
 elementos.atualizar.addEventListener('click', carregarDadosDoBackend);
 elementos.formMovimentacao.addEventListener('submit', cadastrarMovimentacao);
 elementos.formStatus.addEventListener('submit', cadastrarStatus);
+elementos.botaoAbrirHistorico.addEventListener('click', abrirHistorico);
+elementos.botaoFecharHistorico.addEventListener('click', fecharHistorico);
+elementos.formFiltrosHistorico.addEventListener('submit', (evento) => { evento.preventDefault(); carregarHistorico(); });
+elementos.botaoLimparHistorico.addEventListener('click', () => { elementos.formFiltrosHistorico.reset(); carregarHistorico(); });
+elementos.botaoExportarHistorico.addEventListener('click', exportarHistorico);
+elementos.modalHistorico.addEventListener('click', (evento) => { if (evento.target === elementos.modalHistorico) fecharHistorico(); });
+document.addEventListener('keydown', (evento) => {
+  if (evento.key === 'Escape' && !elementos.modalHistorico.classList.contains('hidden')) fecharHistorico();
+});
 
 Promise.all([carregarModelos(), carregarDadosDoBackend()]).catch((erro) => {
   elementos.statusMovimentacao.dataset.status = 'erro';

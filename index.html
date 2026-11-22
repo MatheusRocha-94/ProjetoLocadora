@@ -64,6 +64,9 @@
         <button id="botaoAtualizar" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-kovi-pink hover:opacity-90 active:scale-95 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-kovi-pink/20">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar
         </button>
+        <button id="botaoAbrirHistorico" type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-kovi-dark hover:border-kovi-pink text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition border border-kovi-border">
+          <i data-lucide="history" class="w-4 h-4"></i> Histórico
+        </button>
       </div>
 
     </header>
@@ -262,5 +265,52 @@
 
   </div>
 
+  <div id="modalHistorico" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-3 md:p-6" role="dialog" aria-modal="true" aria-labelledby="tituloHistorico">
+    <div class="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-kovi-border bg-kovi-card shadow-2xl">
+      <div class="flex items-start justify-between border-b border-kovi-border p-5">
+        <div>
+          <h2 id="tituloHistorico" class="text-xl font-bold text-white">Histórico e exportação</h2>
+          <p class="mt-1 text-xs text-slate-400">Consulte retiradas, devoluções e situações operacionais.</p>
+        </div>
+        <button id="botaoFecharHistorico" type="button" class="rounded-lg p-2 text-slate-400 hover:bg-kovi-dark hover:text-white" aria-label="Fechar modal">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto p-5">
+        <form id="formFiltrosHistorico" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <select id="historicoCidade" name="cidade" aria-label="Cidade" class="rounded-xl border border-kovi-border bg-kovi-dark px-3 py-2.5 text-sm text-white">
+            <option value="">Todas as cidades</option><option value="sao-paulo">São Paulo</option><option value="porto-alegre">Porto Alegre</option><option value="santos">Santos</option><option value="belo-horizonte">Belo Horizonte</option><option value="recife">Recife</option><option value="curitiba">Curitiba</option>
+          </select>
+          <select id="historicoModelo" name="modeloId" aria-label="Modelo" class="rounded-xl border border-kovi-border bg-kovi-dark px-3 py-2.5 text-sm text-white"><option value="">Todos os modelos</option></select>
+          <select id="historicoTipo" name="tipo" aria-label="Tipo" class="rounded-xl border border-kovi-border bg-kovi-dark px-3 py-2.5 text-sm text-white">
+            <option value="">Todas as operações</option><option value="retirada">Retirada</option><option value="devolucao">Devolução</option><option value="manutencao">Manutenção</option><option value="retido">Retido</option><option value="sinistro">Sinistro</option>
+          </select>
+          <input id="historicoInicio" name="inicio" type="date" aria-label="Data inicial" class="rounded-xl border border-kovi-border bg-kovi-dark px-3 py-2.5 text-sm text-white">
+          <input id="historicoFim" name="fim" type="date" aria-label="Data final" class="rounded-xl border border-kovi-border bg-kovi-dark px-3 py-2.5 text-sm text-white">
+          <button type="submit" class="rounded-xl bg-kovi-pink px-4 py-2.5 text-sm font-semibold text-white">Filtrar</button>
+        </form>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex gap-5 text-sm text-slate-300">
+            <span><strong id="historicoTotalRegistros" class="text-white">0</strong> registros</span>
+            <span><strong id="historicoTotalVeiculos" class="text-white">0</strong> veículos movimentados</span>
+          </div>
+          <div class="flex gap-2">
+            <button id="botaoLimparHistorico" type="button" class="rounded-xl border border-kovi-border px-4 py-2 text-sm text-slate-300 hover:text-white">Limpar filtros</button>
+            <button id="botaoExportarHistorico" type="button" disabled class="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"><i data-lucide="download" class="h-4 w-4"></i> Exportar CSV</button>
+          </div>
+        </div>
+
+        <p id="statusHistorico" class="status-dashboard mt-4 text-sm text-slate-400" role="status" aria-live="polite"></p>
+        <div class="mt-3 max-h-[48vh] overflow-auto rounded-xl border border-kovi-border">
+          <table class="min-w-full text-left text-sm">
+            <thead class="sticky top-0 bg-kovi-dark text-xs uppercase text-slate-400"><tr><th class="p-3">Data</th><th class="p-3">Cidade</th><th class="p-3">Modelo</th><th class="p-3">Operação</th><th class="p-3 text-right">Qtd.</th><th class="p-3">Observação</th></tr></thead>
+            <tbody id="corpoHistorico" class="divide-y divide-kovi-border"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
